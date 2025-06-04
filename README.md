@@ -1,38 +1,41 @@
-# DCIST PI Meeting 2025 Labs: Metric Semantic SLAM and Scene Graphs
+# DCIST PI Meeting 2025 Labs </br> Metric Semantic SLAM and Scene Graphs
 
 Welcome to our lab!
 This repository contains activities that focus on 3D scene graphs and how to use [spark_dsg](https://github.com/MIT-SPARK/Spark-DSG) to work with them.
 If you are looking for the handout and activities for working with neural SDF representations, they can be found [here](TBD).
 
-## Requirements
+### Requirements
 
 This lab has a minimal set of requirements:
 
-1. A laptop with at least Python 3.8 installed and familiarity with Python
+1. A laptop with at least python 3.8 installed and familiarity with python
 
-2. 3D scene graph examples, which can be found [here](TBD)
+2. Examples of 3D scene graphs, which can be found [here](TBD)
 
 We recommend using Ubuntu 24.04 if possible.
 
 > :warning: **Warning** </br>
 > We have done our best to support platforms other than Linux, but have no experience developing on macOS or Windows.
 > We will not be able to diagnose build and installation issues for `spark_dsg`.
-> However, it is possible to work with the example scene graphs using `networkx` in a limited capacity (`networkx` does not have layered graphs).
+> However, it is possible to work with the example scene graphs using `networkx` in a limited capacity without `spark_dsg`.
 
-## Objectives
+### Objectives
 
 Objectives for this lab include:
 
 1. Familiarizing you with our version of the 3D scene graph data structure
 
 2. Introducing you to [spark_dsg](https://github.com/MIT-SPARK/Spark-DSG) and the available API to work with scene graphs:
-    a. Layers, nodes, edges, and attributes
-    b. Graph structure and working with hierarchy
-    c. Working with external libraries
+
+  1. Layers, nodes, edges, and attributes
+
+  2. Graph structure and working with hierarchy
+
+  3. Working with external libraries
 
 3. Getting feedback on `spark_dsg`
 
-## Getting Started
+### Getting Started
 
 <details open>
 
@@ -78,10 +81,10 @@ cd ~/scene_graph_lab
 jupyter lab
 ```
 
-## Other Activities
+### Other Activities
 
 See [here](https://github.com/MIT-SPARK/Hydra-ROS/blob/feature/ros2_docker/doc/ros2_setup.md#docker) for some information on getting Hydra set up with `docker` in ROS2.
 
-## Feedback
+### Feedback
 
 Please consider filling out the short survey (available in lab) and/or chatting with us during the lab session!
