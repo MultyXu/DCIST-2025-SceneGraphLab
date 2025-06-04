@@ -26,12 +26,9 @@ Objectives for this lab include:
 1. Familiarizing you with our version of the 3D scene graph data structure
 
 2. Introducing you to [spark_dsg](https://github.com/MIT-SPARK/Spark-DSG) and the available API to work with scene graphs:
-
-  1. Layers, nodes, edges, and attributes
-
-  2. Graph structure and working with hierarchy
-
-  3. Working with external libraries
+  - Layers, nodes, edges, and attributes
+  - Graph structure and working with hierarchy
+  - Working with external libraries
 
 3. Getting feedback on `spark_dsg`
 
