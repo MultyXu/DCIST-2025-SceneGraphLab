@@ -8,8 +8,9 @@ If you are looking for the handout and activities for working with neural SDF re
 
 This lab has a minimal set of requirements:
 
-    1. A laptop with at least Python 3.8 installed and familarity with Python
-    2. 3D scene graph examples, which can be found [here](TBD)
+1. A laptop with at least Python 3.8 installed and familarity with Python
+
+2. 3D scene graph examples, which can be found [here](TBD)
 
 We recommend using Ubuntu 24.04 if possible.
 
@@ -22,12 +23,14 @@ We recommend using Ubuntu 24.04 if possible.
 
 Objectives for this lab include:
 
-    1. Familarizing you with our version of the 3D scene graph datastructure
-    2. Introducing you to [spark_dsg](https://github.com/MIT-SPARK/Spark-DSG) and the available API to work with scene graphs:
-        a. Layers, nodes, edges, and attributes
-        b. Graph structure and working with hierarchy
-        c. Working with external libraries
-    3. Getting feedback on `spark_dsg`
+1. Familarizing you with our version of the 3D scene graph datastructure
+
+2. Introducing you to [spark_dsg](https://github.com/MIT-SPARK/Spark-DSG) and the available API to work with scene graphs:
+    a. Layers, nodes, edges, and attributes
+    b. Graph structure and working with hierarchy
+    c. Working with external libraries
+
+3. Getting feedback on `spark_dsg`
 
 ## Getting Started
 
