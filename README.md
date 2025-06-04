@@ -8,14 +8,14 @@ If you are looking for the handout and activities for working with neural SDF re
 
 This lab has a minimal set of requirements:
 
-1. A laptop with at least Python 3.8 installed and familarity with Python
+1. A laptop with at least Python 3.8 installed and familiarity with Python
 
 2. 3D scene graph examples, which can be found [here](TBD)
 
 We recommend using Ubuntu 24.04 if possible.
 
 > :warning: **Warning** </br>
-> We have done our best to support platforms other than Linux, but have no experience with developing on macOS or Windows.
+> We have done our best to support platforms other than Linux, but have no experience developing on macOS or Windows.
 > We will not be able to diagnose build and installation issues for `spark_dsg`.
 > However, it is possible to work with the example scene graphs using `networkx` in a limited capacity (`networkx` does not have layered graphs).
 
@@ -23,7 +23,7 @@ We recommend using Ubuntu 24.04 if possible.
 
 Objectives for this lab include:
 
-1. Familarizing you with our version of the 3D scene graph datastructure
+1. Familiarizing you with our version of the 3D scene graph data structure
 
 2. Introducing you to [spark_dsg](https://github.com/MIT-SPARK/Spark-DSG) and the available API to work with scene graphs:
     a. Layers, nodes, edges, and attributes
@@ -34,16 +34,22 @@ Objectives for this lab include:
 
 ## Getting Started
 
+<details open>
+
+<summary><b>Getting the Lab</b></summary>
+
 First, clone this lab
 ```shell
 git clone https://github.com/MIT-SPARK/DCIST-2025-SceneGraphLab ~/scene_graph_lab
 ```
 
+</details>
+
 We assume you have a virtual python environment set up for this lab. If not, you can expand out the instructions below.
 
 <details closed>
 
-<summary><b>Setting up a Python Virtual Environment on Linux</b></summary>
+<summary><b>Creating a Python Virtual Environment on Linux</b></summary>
 
 ```shell
 # Requirements that you may need:
@@ -53,12 +59,18 @@ python3 -m venv ~/dcist_lab_env
 
 </details>
 
+<details open>
+
+<summary><b>Setting up Your Environment</b></summary>
+
 Source your environment and install the requirements:
 ```shell
 # Use the appropriate invocation for your environment type
 source ~/dcist_lab_env/bin/activate
 pip install -r ~/scene_graph_lab/requirements.txt
 ```
+
+</details>
 
 Then, navigate to the repository and start the notebook:
 ```shell
