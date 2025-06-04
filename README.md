@@ -52,7 +52,7 @@ We assume you have a virtual python environment set up for this lab. If not, you
 <summary><b>Creating a Python Virtual Environment on Linux</b></summary>
 
 ```shell
-# Requirements that you may need:
+# You may need to install the following requirements if you don't have them
 # sudo apt install python3-venv python3-pip
 python3 -m venv ~/dcist_lab_env
 ```
@@ -63,7 +63,7 @@ python3 -m venv ~/dcist_lab_env
 
 <summary><b>Setting up Your Environment</b></summary>
 
-Source your environment and install the requirements:
+Source your environment and install the requirements
 ```shell
 # Use the appropriate invocation for your environment type
 source ~/dcist_lab_env/bin/activate
@@ -72,11 +72,17 @@ pip install -r ~/scene_graph_lab/requirements.txt
 
 </details>
 
-Then, navigate to the repository and start the notebook:
+<details open>
+
+<summary><b>Opening up the Lab</b></summary>
+
+Navigate to the repository and start the notebook
 ```shell
 cd ~/scene_graph_lab
 jupyter lab
 ```
+
+</details>
 
 ### Other Activities
 
