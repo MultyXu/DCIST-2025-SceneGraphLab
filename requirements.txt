@@ -1,0 +1,5 @@
+spark_dsg[viz] @ git+https://github.com/MIT-SPARK/Spark-DSG@develop
+jupyter
+jupytext
+matplotlib
+seaborn
