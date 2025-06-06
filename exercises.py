@@ -258,24 +258,6 @@ for room_id, counts in room_object_counts.items():
 # </details>
 
 # %% [markdown]
-# <details open>
-#     <summary>Solution (click to reveal!)</summary>
-#
-# The solution 
-# ```python
-# points = []
-# key = G.get_layer_key(dsg.DsgLayers.AGENTS)
-# for node in G.get_layer(key.layer, "a").nodes:
-#     points.append(node.attributes.position)
-#
-# points = np.array(points)
-# ax.plot(points[:, 0], points[:, 1])
-# ```
-# <br>
-#
-# </details>
-
-# %% [markdown]
 # ### Planning and Graph Search on 3D Scene Graphs
 #
 # This section of the notebook is designed to familiarize you with how basic and
@@ -283,7 +265,62 @@ for room_id, counts in room_object_counts.items():
 # Note that there is active research on hierarchical planning in 3D scene graphs
 # (that we are not attempting to cover).
 
+# %% [markdown]
+# #### Exercise 2.1
+#
+# Given two place nodes, produce the shortest path between them in the places layer.
+
 # %%
+
+# %% [markdown]
+# <details>
+#     <summary>Solution (click to reveal!)</summary>
+#
+# ```python
+# # TODO(nathan)
+# ```
+# <br>
+#
+# </details>
+
+# %% [markdown]
+# #### Exercise 2.2
+#
+# Given a region and two place nodes that are contained in the region, return the shortest path between the two place nodes that remains inside the region.
+
+# %%
+
+# %% [markdown]
+# <details>
+#     <summary>Solution (click to reveal!)</summary>
+#
+# ```python
+# # TODO(nathan)
+# ```
+# <br>
+#
+# </details>
+
+# %% [markdown]
+# #### Exercise 2.3
+#
+# Find the shortest path between two points by:
+#   - Looking up the regions that contain the start and goal point
+#   - Planning the shortest path through the regions between the start and goal region
+#   - Concatenating the shortest path between each pair of regions through the places layer
+
+# %%
+
+# %% [markdown]
+# <details>
+#     <summary>Solution (click to reveal!)</summary>
+#
+# ```python
+# # TODO(nathan)
+# ```
+# <br>
+#
+# </details>
 
 # %% [markdown]
 # ### Using External Libraries
