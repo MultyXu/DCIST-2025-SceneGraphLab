@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dcist_sgl"
+version = "0.0.1"
+dependencies = [
+    "spark_dsg@git+https://github.com/MIT-SPARK/Spark-DSG@develop",
+    "gdown",
+    "ipympl",
+    "jupyter",
+    "jupytext",
+    "matplotlib",
+    "seaborn",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

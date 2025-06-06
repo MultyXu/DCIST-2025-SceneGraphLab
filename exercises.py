@@ -27,10 +27,12 @@
 #   3. [Planning and Graph Search on 3D Scene Graphs](#Planning-and-Graph-Search-on-3D-Scene-Graphs): More detailed exercises on how to using the graph datastructure
 #   4. [Using External Libraries](#Using-External-Libraries): How to export and use 3D scene graphs with `networkx` and `pytorch_geometric`
 #
-# Please make sure you have at least one scene graph downloaded from [here](https://drive.google.com/drive/folders/1ONZ0Sx_tgNtS1gmGAiyRuhp1B6iw4-9E?usp=sharing).
+# This notebook will download several example scene graphs from [here](https://drive.google.com/drive/folders/1ONZ0Sx_tgNtS1gmGAiyRuhp1B6iw4-9E?usp=sharing).
 # Most examples will reference the `uhumans2_office_ade20k_full_dsg.json` file.
 # We recommend using the `[NAME]_dsg.json` variants over the `[NAME]_dsg_with_mesh.json`
 # variants in most cases.
+#
+# If you are having trouble getting the automatic download to work, we can help manually download them for you (they should go in the `src/dcist_sgl/scene_graphs` directory relative to this file).
 
 # %% [markdown]
 # ### Introduction to Spark-DSG
@@ -56,28 +58,104 @@ import spark_dsg as dsg
 # G.save("output.json", include_mesh=True)
 # ```
 #
-# The following cell loads all downloaded example graphs.
+# The following cell sets up a few dependencies for the rest of the notebook and downloads and loads all the example scene graphs. Internally, the library we've set up for this lab (`dcist_sgl`) is calling `dsg.load("scene_graphs/[FILENAME].json")` for every downloaded file.
 
 # %%
-# TODO(nathan) write library and export
-
-# %%
+import heapq
 import pathlib
 import pprint
-from typing import Dict, List
+import random
 
-import ipywidgets as widgets
+import dcist_sgl
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 
 # %matplotlib ipympl
 
-# %%
-# This loads and deserializes the scene graph from the provided file
-dsg_path = pathlib.Path("~/dsg_with_mesh.json").expanduser().resolve()
-G = dsg.DynamicSceneGraph.load(dsg_path)
+graphs = dcist_sgl.load_examples()
 
+# This sets the graph to use for the following examples and exercises.
+# Feel free to browse the available examples and pick a different one!
+G = graphs["uhumans2_office_ade20k_full_dsg_with_mesh"].clone()
+
+# %% [markdown]
+# #### Layers and Partitions
+#
+# Any scene graph in `spark_dsg` contains some number of layers; these layers each have a numerical layer ID. These layer IDs enforcing a hierarchy between the layers. For example, our typical "schema" has objects assigned to layer 2 and places assigned to layer 3. Any edge between a place node and an object node considers the place node the "parent" in the relationship and the object node the "child".
+#
+# Each numerical layer ID can be associated with multiple partitions (each with their own numerical partition ID). Each layer has a default "primary" partition (ID 0) and arbitrary "secondary" partitions.
+# You can access any layer with numerical IDs via
+# ```python
+# G.get_layer(layer_id, partition_id)
+# ```
+#
+# We also support lookup of layers by human-readable names, e.g.,
+# ```python
+# G.get_layer(dsg.DsgLayers.OBJECTS)
+# ```
+# where `dsg.DsgLayers.OBJECTS` maps to the string "OBJECTS".
+#
+# See the cell below for more examples!
+
+# %%
+# basic information about the different layers
+print(f"Number of objects: {G.get_layer(dsg.DsgLayers.OBJECTS).num_nodes()}")
+print(f"Number of places: {G.get_layer(dsg.DsgLayers.PLACES).num_nodes()}")
+print(f"Number of rooms: {G.get_layer(dsg.DsgLayers.ROOMS).num_nodes()}")
+
+# more about "a" as a partition ID later, but "a" is mapped internally to the corresponding ASCII value 97
+print(f"Number of robot poses: {G.get_layer(2, 'a').num_nodes()}")
+
+# get the numerical IDs associated with a layer name
+print("Places layer and partition:", G.get_layer_key(dsg.DsgLayers.PLACES))
+print("2D Places layer and partition:", G.get_layer_key(dsg.DsgLayers.MESH_PLACES))
+
+# %% [markdown]
+# #### Nodes and Edges
+#
+# Every node in the scene graph has an unique integer ID that has a corresponding human-readable "symbol" that consists of a prefix character (e.g., 'O', 'p', 'R') and an index (e.g., 3, 15). You can get the integer ID from a "node symbol" via
+# ```python
+# dsg.NodeSymbol('P', 4).value  # returns 5764607523034234884
+# ```
+#
+# Many scene graph and scene graph layer methods will convert node symbol arguments, i.e., `G.has_node(5764607523034234884)` and `G.has_node(dsg.NodeSymbol('P', 4))` will function the same.
+#
+# Every node in the graph has a set of attributes; these differ depending on the type of node. However, every node at least has a position and timestamp associated with it.
+#
+# Edges are keyed as source and target node IDs and are undirected. Edges also carry attributes, though these are less commonly used.
+#
+# See the cell below for some examples with nodes and edges!
+
+# %%
+first_object = None
+for node in G.get_layer(dsg.DsgLayers.OBJECTS).nodes:
+    first_object = node
+    break
+
+print(first_object)
+
+first_place_edge = None
+for edge in G.get_layer(dsg.DsgLayers.PLACES).edges:
+    first_place_edge = edge
+
+print(first_place_edge)
+
+# you can get nodes and edges directly from the scene graph
+source = G.get_node(first_place_edge.source)
+print(f"Source {source.id.str()} siblings: {[dsg.NodeSymbol(x).str() for x in source.siblings()]}")
+print(f"Target information:\n{G.get_node(first_place_edge.target).attributes}")
+
+# %% [markdown]
+# #### Getting information about `spark_dsg`
+#
+# You may find `help` useful in determining avaiable methods and properties of different objects in `spark_dsg`. We've already ran `help` for a couple of the more helpful objects that you may use!
+
+# %%
+help(dsg.SceneGraphNode)
+
+# %%
+help(dsg.SemanticNodeAttributes)  # many of the node attributes inherit from this class
 
 # %% [markdown]
 # ### The Scene Graph Datastructure
@@ -130,7 +208,7 @@ pprint.pprint([x.str(False) for x in big_objects])
 
 
 # %%
-def get_object_label_histogram(G) -> Dict[str, int]:
+def get_object_label_histogram(G: dsg.DynamicSceneGraph):
     key = G.get_layer_key(dsg.DsgLayers.OBJECTS)
     labelspace = G.get_labelspace(key.layer, key.partition)
 
@@ -231,6 +309,7 @@ for room_id, counts in room_object_counts.items():
     print(f"Room {room_id}:")
     pprint.pprint({k: v for k, v in counts.items() if v > 0}, indent=2)
 
+
 # %% [markdown]
 # <details>
 #     <summary>Solution (click to reveal!)</summary>
@@ -268,16 +347,89 @@ for room_id, counts in room_object_counts.items():
 # %% [markdown]
 # #### Exercise 2.1
 #
-# Given two place nodes, produce the shortest path between them in the places layer.
+# Given two place nodes, produce the shortest path between them in the places layer. We provide most of the implementation for A*; the only parts you have to fill in is (i) the computation of the path length to each node being considered for expansion and (ii) the computation of the heuristic between the node being considered for expansion and the goal.
 
 # %%
+def get_path_recursive(parents, prev_path, source):
+    """Translates parent map to an actual list of node IDs in a path."""
+    to_expand = prev_path[0]
+    if to_expand == source:
+        return prev_path
+
+    return get_path_recursive(parents, [parents[to_expand]] + prev_path, source)
+
+
+def plan_path(G: dsg.DynamicSceneGraph, source: int, target: int, layer_name: str = dsg.DsgLayers.PLACES, is_valid=None):
+    """Plan a path between the source and target node."""
+    layer = G.get_layer(layer_name)
+    if not layer.has_node(source) or not layer.has_node(target):
+        print(f"Graph does not contain {dsg.NodeSymbol(source).str()} or {dsg.NodeSymbol(target).str()}")
+        return None
+
+    visited = set()
+    open_set = [(0.0, source)]
+    cost_to_go = {source: 0.0}
+    parents = {}
+    while len(open_set) > 0:
+        _, node_id = heapq.heappop(open_set)
+        if node_id == target:
+            break
+    
+        if node_id in visited:
+            continue
+            
+        visited.add(node_id)
+        curr_node = G.get_node(node_id)
+        curr_dist = cost_to_go[node_id]
+        
+        for sibling_id in curr_node.siblings():
+            if is_valid is not None and not is_valid(sibling_id):
+                continue
+            
+            sibling = G.get_node(sibling_id)
+            
+            g = 0.0  # cost to go (i.e., total distance to sibling node)
+            h = 0.0  # heuristic estimate (euclidean distance to target)
+            
+            # =======================
+            # TODO: Fill in code here
+            # =======================
+            
+            f = g + h
+            if sibling_id in cost_to_go and f >= cost_to_go[sibling_id]:
+                continue
+                
+            cost_to_go[sibling_id] = g
+            parents[sibling_id] = node_id
+            heapq.heappush(open_set, (f, sibling_id))
+
+    if target not in parents:
+        print(f"No viable path to target {dsg.NodeSymbol(target).str()}")
+        return None
+
+    return get_path_recursive(parents, [target], source)
+
+
+place_ids = [x.id.value for x in G.get_layer(dsg.DsgLayers.PLACES).nodes]
+random.seed(12345678)
+random.shuffle(place_ids)
+
+path = plan_path(G, place_ids[0], place_ids[1])
+dcist_sgl.show_planning_result(G, path)
+
 
 # %% [markdown]
 # <details>
 #     <summary>Solution (click to reveal!)</summary>
 #
+# Note that it is slightly more efficient to pre-compute the edge distances and/or cache some of the positions earlier in the algorithm, but this is the most self-contained way to compute the relevant quantitites:
+#
 # ```python
-# # TODO(nathan)
+# p_target = G.get_node(target).attributes.position
+# p_curr = curr_node.attributes.position
+# p_sibling = sibling.attributes.position
+# g = np.linalg.norm(p_curr - p_sibling) + curr_dist
+# h = np.linalg.norm(p_target - p_sibling)        
 # ```
 # <br>
 #
@@ -286,18 +438,54 @@ for room_id, counts in room_object_counts.items():
 # %% [markdown]
 # #### Exercise 2.2
 #
-# Given a region and two place nodes that are contained in the region, return the shortest path between the two place nodes that remains inside the region.
+# Given a region and two place nodes that are contained in the region, return the shortest path between the two place nodes that remains inside the region. `plan_path` from the previous exercise takes an optional filter when expanding nodes that you can use to accomplish this.
 
 # %%
+def plan_path_in_region(G: dsg.DynamicSceneGraph, region: int, source: int, target: int):
+    """Plan a path between the source and target node inside a region."""
+
+    # =======================
+    # TODO: Fill in code here
+    # =======================
+    
+    def node_in_region(node_id):
+        """Check if node exists in region."""
+        in_region = True
+        # =======================
+        # TODO: Fill in code here
+        # =======================
+        return in_region
+            
+    
+    return plan_path(G, source, target, is_valid=node_in_region)
+
+region_ids = [x.id.value for x in G.get_layer(dsg.DsgLayers.ROOMS).nodes] 
+random.shuffle(region_ids)
+
+region = region_ids[0]
+children = dcist_sgl.get_room_children(G, region)
+random.shuffle(children)
+
+path = plan_path_in_region(G, region, children[0], children[1])
+dcist_sgl.show_region_planning_result(G, path, region)
 
 # %% [markdown]
 # <details>
 #     <summary>Solution (click to reveal!)</summary>
 #
+# To set up the filter, we populate all the children of the region:
 # ```python
-# # TODO(nathan)
+# parent = G.get_node(region)
+# children = set([x for x in parent.children() if G.get_layer(dsg.DsgLayers.PLACES).has_node(x)])
 # ```
 # <br>
+#
+# The filter itself is just
+# ```python
+# in_region = node_id in children
+# ```
+# <br>
+# and can be condensed to `return node_id in children` if desired. 
 #
 # </details>
 

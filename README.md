@@ -6,13 +6,7 @@ If you are looking for the handout and activities for working with neural SDF re
 
 ### Requirements
 
-This lab has a minimal set of requirements:
-
-1. A laptop with at least python 3.8 installed and familiarity with python
-
-2. Examples of 3D scene graphs, which can be found [here](TBD)
-
-We recommend using Ubuntu 24.04 if possible.
+This lab requires a laptop with at least python 3.8 installed and familiarity with python. However, we recommend using Ubuntu 24.04 if possible.
 
 > :warning: **Warning** </br>
 > We have done our best to support platforms other than Linux, but have no experience developing on macOS or Windows.
@@ -67,7 +61,7 @@ Source your environment and install the requirements
 ```shell
 # Use the appropriate invocation for your environment type
 source ~/dcist_lab_env/bin/activate
-pip install -r ~/scene_graph_lab/requirements.txt
+pip install -e ~/scene_graph_lab
 ```
 
 </details>
