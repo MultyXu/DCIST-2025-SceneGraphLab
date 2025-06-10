@@ -60,7 +60,6 @@ import spark_dsg as dsg
 
 # %%
 import heapq
-import pathlib
 import pprint
 import random
 
@@ -255,13 +254,13 @@ def plot_agent_trajectory(G):
     with sns.axes_style("whitegrid"):
         ax = fig.add_subplot()
         ax.axis("equal")
-    
+
     # =======================
     # TODO: Fill in code here
     # =======================
 
     fig.tight_layout()
-    
+
 
 plot_agent_trajectory(G)
 
@@ -294,11 +293,11 @@ def get_object_counts_per_room(G):
     # This should be a mapping between the node ID of each room and a dictionary
     # containing the category name and number of object instances for that category
     room_object_counts = {}
-    
+
     # =======================
     # TODO: Fill in code here
     # =======================
-    
+
     return room_object_counts
 
 
@@ -327,7 +326,7 @@ for room_id, counts in room_object_counts.items():
 #
 #             child = G.get_node(child_id)
 #             curr_histogram[labelspace.labels_to_names[child.attributes.semantic_label]] += 1
-#     
+#
 #     room_object_counts[room.id] = curr_histogram
 # ```
 # <br>
@@ -372,31 +371,31 @@ def plan_path(G: dsg.DynamicSceneGraph, source: int, target: int, layer_name: st
         _, node_id = heapq.heappop(open_set)
         if node_id == target:
             break
-    
+
         if node_id in visited:
             continue
-            
+
         visited.add(node_id)
         curr_node = G.get_node(node_id)
         curr_dist = cost_to_go[node_id]
-        
+
         for sibling_id in curr_node.siblings():
             if is_valid is not None and not is_valid(sibling_id):
                 continue
-            
+
             sibling = G.get_node(sibling_id)
-            
+
             g = 0.0  # cost to go (i.e., total distance to sibling node)
             h = 0.0  # heuristic estimate (euclidean distance to target)
-            
+
             # =======================
             # TODO: Fill in code here
             # =======================
-            
+
             f = g + h
             if sibling_id in cost_to_go and f >= cost_to_go[sibling_id]:
                 continue
-                
+
             cost_to_go[sibling_id] = g
             parents[sibling_id] = node_id
             heapq.heappush(open_set, (f, sibling_id))
@@ -427,7 +426,7 @@ dcist_sgl.show_planning_result(G, path)
 # p_curr = curr_node.attributes.position
 # p_sibling = sibling.attributes.position
 # g = np.linalg.norm(p_curr - p_sibling) + curr_dist
-# h = np.linalg.norm(p_target - p_sibling)        
+# h = np.linalg.norm(p_target - p_sibling)
 # ```
 # <br>
 #
@@ -445,7 +444,7 @@ def plan_path_in_region(G: dsg.DynamicSceneGraph, region: int, source: int, targ
     # =======================
     # TODO: Fill in code here
     # =======================
-    
+
     def node_in_region(node_id):
         """Check if node exists in region."""
         in_region = True
@@ -453,11 +452,11 @@ def plan_path_in_region(G: dsg.DynamicSceneGraph, region: int, source: int, targ
         # TODO: Fill in code here
         # =======================
         return in_region
-            
-    
+
+
     return plan_path(G, source, target, is_valid=node_in_region)
 
-region_ids = [x.id.value for x in G.get_layer(dsg.DsgLayers.ROOMS).nodes] 
+region_ids = [x.id.value for x in G.get_layer(dsg.DsgLayers.ROOMS).nodes]
 random.shuffle(region_ids)
 
 region = region_ids[0]
@@ -582,7 +581,6 @@ class Classifier(torch.nn.Module):
         x = self.conv(x, edge_index)
         return (x[:, 0] > self.x_value).to(torch.int64)
 
-        
 def node_feature(G, node):
     return node.attributes.position
 

@@ -7,7 +7,8 @@ import seaborn as sns
 import spark_dsg as dsg
 
 URLS = {
-    "uhumans2_office_ade20k_full_dsg_with_mesh": "1jwcjrE4-6PvOgEgJipETkQaLgC43biFT"
+    "uhumans2_office_ade20k_full_dsg_with_mesh": "1jwcjrE4-6PvOgEgJipETkQaLgC43biFT",
+    "mit_courtyard_ade20k_full_dsg_with_mesh": "1wysF6XgSUOmOnQ6k-zLCnfEXlI9lcwM9",
 }
 
 
