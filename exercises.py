@@ -504,7 +504,12 @@ def plan_path_through_regions(G: dsg.DynamicSceneGraph, start: int, end: int):
     if not start_node.has_parent() or not end_node.has_parent():
         return []
 
-    room_sequence = plan_path(G, start_node.get_parent(), end_node.get_parent(), layer_name=dsg.DsgLayers.ROOMS)
+    room_sequence = []
+
+    # =========================================================
+    # TODO: Fill in code here to get a path through the regions
+    # =========================================================
+
     if len(room_sequence) == 1:
         return plan_path_in_region(G, room_sequence[0], start, end)
     
@@ -527,7 +532,7 @@ dcist_sgl.show_planning_result(G, path)
 #     <summary>Solution (click to reveal!)</summary>
 #
 # ```python
-# # TODO(nathan)
+# room_sequence = plan_path(G, start_node.get_parent(), end_node.get_parent(), layer_name=dsg.DsgLayers.ROOMS)
 # ```
 # <br>
 #
