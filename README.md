@@ -62,6 +62,8 @@ Source your environment and install the requirements
 # Use the appropriate invocation for your environment type
 source ~/dcist_lab_env/bin/activate
 pip install -e ~/scene_graph_lab
+# optionally install torch for one of the examples:
+pip3 install torch --index-url https://download.pytorch.org/whl/cpu
 ```
 
 </details>

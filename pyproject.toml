@@ -12,7 +12,9 @@ dependencies = [
     "jupyter",
     "jupytext",
     "matplotlib",
+    "networkx",
     "seaborn",
+    "torch_geometric",
 ]
 
 [tool.setuptools]

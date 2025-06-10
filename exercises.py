@@ -28,9 +28,7 @@
 #   4. [Using External Libraries](#Using-External-Libraries): How to export and use 3D scene graphs with `networkx` and `pytorch_geometric`
 #
 # This notebook will download several example scene graphs from [here](https://drive.google.com/drive/folders/1ONZ0Sx_tgNtS1gmGAiyRuhp1B6iw4-9E?usp=sharing).
-# Most examples will reference the `uhumans2_office_ade20k_full_dsg.json` file.
-# We recommend using the `[NAME]_dsg.json` variants over the `[NAME]_dsg_with_mesh.json`
-# variants in most cases.
+# Most examples will reference the `uhumans2_office_ade20k_full_dsg_with_mesh.json` file.
 #
 # If you are having trouble getting the automatic download to work, we can help manually download them for you (they should go in the `src/dcist_sgl/scene_graphs` directory relative to this file).
 
@@ -469,6 +467,7 @@ random.shuffle(children)
 path = plan_path_in_region(G, region, children[0], children[1])
 dcist_sgl.show_region_planning_result(G, path, region)
 
+
 # %% [markdown]
 # <details>
 #     <summary>Solution (click to reveal!)</summary>
@@ -493,11 +492,35 @@ dcist_sgl.show_region_planning_result(G, path, region)
 # #### Exercise 2.3
 #
 # Find the shortest path between two points by:
-#   - Looking up the regions that contain the start and goal point
+#   - Looking up the regions that contain the start and goal place
 #   - Planning the shortest path through the regions between the start and goal region
 #   - Concatenating the shortest path between each pair of regions through the places layer
 
 # %%
+def plan_path_through_regions(G: dsg.DynamicSceneGraph, start: int, end: int):
+    """Plan a path between two places using the region layer."""
+    start_node = G.get_node(start)
+    end_node = G.get_node(end)
+    if not start_node.has_parent() or not end_node.has_parent():
+        return []
+
+    room_sequence = plan_path(G, start_node.get_parent(), end_node.get_parent(), layer_name=dsg.DsgLayers.ROOMS)
+    if len(room_sequence) == 1:
+        return plan_path_in_region(G, room_sequence[0], start, end)
+    
+    path = []
+    prev_place = start
+    for i in range(1, len(room_sequence)):
+        prev_room_place, next_room_place = dcist_sgl.get_room_connection(G, room_sequence[i - 1], room_sequence[i])
+        path += plan_path_in_region(G, room_sequence[i - 1], prev_place, prev_room_place)
+        path.append(next_room_place)
+        prev_place = next_room_place
+
+    return path
+
+
+path = plan_path_through_regions(G, place_ids[0], place_ids[1])
+dcist_sgl.show_planning_result(G, path)
 
 # %% [markdown]
 # <details>
@@ -513,6 +536,64 @@ dcist_sgl.show_region_planning_result(G, path, region)
 # %% [markdown]
 # ### Using External Libraries
 
+# %% [markdown]
+# #### Example 3.1
+#
+# This example converts the places layer to networkx and uses an approximate TSP solver from networkx to plan a cycle between a list of place nodes
+
 # %%
+from spark_dsg.networkx import layer_to_networkx
+import networkx as nx
+
+layer_nx = layer_to_networkx(G.get_layer(dsg.DsgLayers.PLACES))
+for source, target in layer_nx.edges:
+    pos_s = layer_nx.nodes[source]["position"]
+    pos_t = layer_nx.nodes[target]["position"]
+    dist = np.linalg.norm(pos_s - pos_t)
+    layer_nx.edges[source, target]["dist"] = dist
+
+# weight for TSP solver is actually cost
+path = nx.approximation.traveling_salesman_problem(layer_nx, nodes=place_ids[:10], weight="dist")
+dcist_sgl.show_planning_result(G, path)
+
+# %% [markdown]
+# #### Example 3.2
+#
+# This example uses [pytorch-geometric](https://pytorch-geometric.readthedocs.io/en/latest/) to locally average the positions of the nodes in the place layer.
+
+# %%
+import torch
+import torch_geometric.nn as pyg_nn
+
+
+class Classifier(torch.nn.Module):
+
+    def __init__(self, x_value):
+        super().__init__()
+        self.x_value = x_value
+        self.conv = pyg_nn.SimpleConv(aggr="mean", combine_root="self_loop")
+
+    def forward(self, x, edge_index):
+        x = self.conv(x, edge_index)
+        return (x[:, 0] > self.x_value).to(torch.int64)
+
+        
+def node_feature(G, node):
+    return node.attributes.position
+
+
+G_torch = G.get_layer(dsg.DsgLayers.PLACES).to_torch(node_feature)
+model = Classifier(5.0)
+y = model(G_torch.x, G_torch.edge_index.to(torch.int64))
+
+fig = plt.figure(figsize=(8, 5))
+with sns.axes_style("whitegrid"):
+    ax = fig.add_subplot()
+    ax.axis("equal")
+
+colors = np.array([[0.0, 0.0, 0.0], [1.0, 0.0, 0.0]])
+dcist_sgl.draw_layer(ax, G, dsg.DsgLayers.PLACES)
+ax.scatter(G_torch.pos[:, 0], G_torch.pos[:, 1], color=colors[y])
+fig.tight_layout()
 
 # %%

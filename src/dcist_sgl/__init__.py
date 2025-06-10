@@ -93,3 +93,19 @@ def get_room_children(G, node_id):
     """Get place IDs that are children of a room node."""
     node = G.get_node(node_id)
     return [x for x in node.children() if G.get_layer(dsg.DsgLayers.PLACES).has_node(x)]
+
+
+def get_room_connection(G, room1, room2):
+    """Get a pair of place IDs that share and edge between the two rooms."""
+    r1_node = G.get_node(room1)
+    for child in r1_node.children():
+        child_node = G.get_node(child)
+        for sibling in child_node.siblings():
+            sibling_node = G.get_node(sibling)
+            if not sibling_node.has_parent():
+                continue
+
+            if sibling_node.get_parent() == room2:
+                return child_node.id.value, sibling_node.id.value
+
+    return None
