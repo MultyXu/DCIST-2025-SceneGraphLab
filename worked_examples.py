@@ -346,7 +346,7 @@ place_ids = [x.id.value for x in G.get_layer(dsg.DsgLayers.PLACES).nodes]
 random.seed(12345678)
 random.shuffle(place_ids)
 
-path = plan_path(G, place_ids[0], place_ids[1])
+path = plan_path(G, place_ids[10], place_ids[4])
 dcist_sgl.show_planning_result(G, path)
 
 
@@ -409,7 +409,7 @@ def plan_path_through_regions(G: dsg.DynamicSceneGraph, start: int, end: int):
     return path
 
 
-path = plan_path_through_regions(G, place_ids[0], place_ids[1])
+path = plan_path_through_regions(G, place_ids[10], place_ids[4])
 dcist_sgl.show_planning_result(G, path)
 
 # %% [markdown]
