@@ -2,7 +2,7 @@
 
 Welcome to our lab!
 This repository contains activities that focus on 3D scene graphs and how to use [spark_dsg](https://github.com/MIT-SPARK/Spark-DSG) to work with them.
-If you are looking for the handout and activities for working with neural SDF representations, they can be found [here](TBD).
+If you are looking for the handout and activities for working with neural SDF representations, they can be found [here](https://github.com/hwcao17/MISO-DCIST-Lab).
 
 ### Requirements
 
