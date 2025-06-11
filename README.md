@@ -34,21 +34,24 @@ Objectives for this lab include:
 
 First, clone this lab
 ```shell
-git clone https://github.com/MIT-SPARK/DCIST-2025-SceneGraphLab ~/scene_graph_lab
+git clone https://github.com/MIT-SPARK/DCIST-2025-SceneGraphLab
 ```
+
+Open the root directory of the repository in the terminal.
 
 </details>
 
-We assume you have a virtual python environment set up for this lab. If not, you can expand out the instructions below.
+We assume you have a virtual python environment set up for this lab. If not, you can follow the instructions below.
 
-<details closed>
+<details open>
 
 <summary><b>Creating a Python Virtual Environment on Linux</b></summary>
 
 ```shell
 # You may need to install the following requirements if you don't have them
+# For ubuntu, this looks like:
 # sudo apt install python3-venv python3-pip
-python3 -m venv ~/dcist_lab_env
+python3 -m venv dcist_lab_env
 ```
 
 </details>
@@ -60,9 +63,9 @@ python3 -m venv ~/dcist_lab_env
 Source your environment and install the requirements
 ```shell
 # Use the appropriate invocation for your environment type
-source [PATH/TO/LAB/ENV]/bin/activate
+source dcist_lab_env/bin/activate
 
-pip install -e ~/scene_graph_lab
+pip install -e .
 # optionally install torch for one of the examples:
 pip3 install torch --index-url https://download.pytorch.org/whl/cpu
 ```
@@ -73,9 +76,8 @@ pip3 install torch --index-url https://download.pytorch.org/whl/cpu
 
 <summary><b>Opening up the Lab</b></summary>
 
-Navigate to the repository and start the notebook
+Start the notebook
 ```shell
-cd ~/scene_graph_lab
 jupyter notebook
 ```
 

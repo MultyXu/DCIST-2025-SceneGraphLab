@@ -23,8 +23,8 @@
 #
 # This notebook is divided into 4 sections:
 #   1. [Introduction to Spark-DSG](#Introduction-to-Spark-Dsg): Examples and documentation around the Spark-DSG API
-#   2. [The Scene Graph Datastructure](#The-Scene-Graph-Datastructure): Exercises and examples for working with nodes, edges and attributes
-#   3. [Planning and Graph Search on 3D Scene Graphs](#Planning-and-Graph-Search-on-3D-Scene-Graphs): More detailed exercises on how to using the graph datastructure
+#   2. [The Scene Graph Datastructure](#The-Scene-Graph-Datastructure): Examples for working with nodes, edges and attributes
+#   3. [Planning and Graph Search on 3D Scene Graphs](#Planning-and-Graph-Search-on-3D-Scene-Graphs): More detailed examples on how to using the graph datastructure
 #   4. [Using External Libraries](#Using-External-Libraries): How to export and use 3D scene graphs with `networkx` and `pytorch_geometric`
 #
 # This notebook will download several example scene graphs from [here](https://drive.google.com/drive/folders/1ONZ0Sx_tgNtS1gmGAiyRuhp1B6iw4-9E?usp=sharing).
@@ -161,7 +161,7 @@ help(dsg.SemanticNodeAttributes)  # many of the node attributes inherit from thi
 # datastructure as it is represented in `spark_dsg`.
 
 # %% [markdown]
-# #### Exercise 1.1
+# #### Example 1.1
 # Find the node IDs of all the object nodes with bounding boxes of volume larger than 1 m^3. You may find the following helpful:
 
 
@@ -171,11 +171,11 @@ help(dsg.BoundingBox.volume)
 
 # %%
 def get_big_objects(G: dsg.DynamicSceneGraph, volume: float = 1.0):
-    big_nodes: List[dsg.NodeSymbol] = []
-
-    # =======================
-    # TODO: Fill in code here
-    # =======================
+    big_nodes = [
+        x.id
+        for x in G.get_layer(dsg.DsgLayers.OBJECTS).nodes
+        if x.attributes.bounding_box.volume() > volume
+    ]
 
     return big_nodes
 
@@ -187,20 +187,7 @@ pprint.pprint([x.str(False) for x in big_objects])
 
 
 # %% [markdown]
-# <details>
-#     <summary>Solution (click to reveal!)</summary>
-#
-# The solution for this exercise is to just iterate through the nodes in the object layer and use the bounding box attribute:
-# ```python
-# big_nodes = [
-#     x.id
-#     for x in G.get_layer(dsg.DsgLayers.OBJECTS).nodes
-#     if x.attributes.bounding_box.volume() > volume
-# ]
-# ```
-
-# %% [markdown]
-# #### Exercise 1.2
+# #### Example 1.2
 # Compute a histogram of object labels keyed by human-readable category name
 
 
@@ -213,9 +200,8 @@ def get_object_label_histogram(G: dsg.DynamicSceneGraph):
     for name in labelspace.names_to_labels:
         histogram[name] = 0
 
-    # =======================
-    # TODO: Fill in code here
-    # =======================
+    for node in G.get_layer(dsg.DsgLayers.OBJECTS).nodes:
+        histogram[labelspace.labels_to_names[node.attributes.semantic_label]] += 1
 
     return histogram
 
@@ -225,25 +211,7 @@ pprint.pprint({k: v for k, v in label_counts.items() if v > 0})
 
 
 # %% [markdown]
-# <details>
-#     <summary>Solution (click to reveal!)</summary>
-#
-# The solution for this exercise (i) iterates through the object layer nodes and (ii) uses the semantic (integer) label of the node to look up the corresponding category name:
-# ```python
-# for node in G.get_layer(dsg.DsgLayers.OBJECTS).nodes:
-#     histogram[labelspace.labels_to_names[node.attributes.semantic_label]] += 1
-# ```
-# <br>
-#
-# This example only applies to closed-set objects.
-# Language features can be accessed and used through the `semantic_feature` attribute,
-# which would be required (along with the associated category embeddings) if you tried to implement something similar for
-# some sort of zero-shot set of categories.
-#
-# </details>
-
-# %% [markdown]
-# #### Exercise 1.3
+# #### Example 1.3
 #
 # Plot the 2D x-y projection of the robot trajectory. Note that information about the trajectory is contained in a partition of the AGENTS layer, where the partition ID is the ASCII value of the identifier for that particular robot (typically one of `['a', 'b', 'c', 'd', 'e']`). All of the provided scene graphs are built with a single robot that has the identifier 'a'. The layer name AGENTS maps to the "primary" partition of the layer that contains all of the agent trajectories.
 
@@ -255,37 +223,19 @@ def plot_agent_trajectory(G):
         ax = fig.add_subplot()
         ax.axis("equal")
 
-    # =======================
-    # TODO: Fill in code here
-    # =======================
+    key = G.get_layer_key(dsg.DsgLayers.AGENTS)
+
+    points = []
+    for node in G.get_layer(key.layer, "a").nodes:
+        points.append(node.attributes.position)
+
+    points = np.array(points)
+    ax.plot(points[:, 0], points[:, 1])
 
     fig.tight_layout()
 
 
 plot_agent_trajectory(G)
-
-# %% [markdown]
-# <details>
-#     <summary>Solution (click to reveal!)</summary>
-#
-# ```python
-# key = G.get_layer_key(dsg.DsgLayers.AGENTS)
-#
-# points = []
-# for node in G.get_layer(key.layer, "a").nodes:
-#     points.append(node.attributes.position)
-#
-# points = np.array(points)
-# ax.plot(points[:, 0], points[:, 1])
-# ```
-# <br>
-#
-# </details>
-
-# %% [markdown]
-# #### Exercise 1.4
-#
-# Create a histogram of the object categories in each room
 
 
 # %%
@@ -294,9 +244,21 @@ def get_object_counts_per_room(G):
     # containing the category name and number of object instances for that category
     room_object_counts = {}
 
-    # =======================
-    # TODO: Fill in code here
-    # =======================
+    key = G.get_layer_key(dsg.DsgLayers.OBJECTS)
+    labelspace = G.get_labelspace(key.layer, key.partition)
+
+    for room in G.get_layer(dsg.DsgLayers.ROOMS).nodes:
+        curr_histogram = {n: 0 for n in labelspace.names_to_labels}
+        for place_id in room.children():
+            place = G.get_node(place_id)
+            for child_id in place.children():
+                if dsg.NodeSymbol(child_id).category != "O":
+                    continue
+
+                child = G.get_node(child_id)
+                curr_histogram[labelspace.labels_to_names[child.attributes.semantic_label]] += 1
+
+        room_object_counts[room.id] = curr_histogram
 
     return room_object_counts
 
@@ -308,32 +270,6 @@ for room_id, counts in room_object_counts.items():
 
 
 # %% [markdown]
-# <details>
-#     <summary>Solution (click to reveal!)</summary>
-#
-# Any solution to this problem requires going through the places layer to connect the objects to the rooms.
-# ```python
-# key = G.get_layer_key(dsg.DsgLayers.OBJECTS)
-# labelspace = G.get_labelspace(key.layer, key.partition)
-#
-# for room in G.get_layer(dsg.DsgLayers.ROOMS).nodes:
-#     curr_histogram = {n: 0 for n in labelspace.names_to_labels}
-#     for place_id in room.children():
-#         place = G.get_node(place_id)
-#         for child_id in place.children():
-#             if dsg.NodeSymbol(child_id).category != "O":
-#                 continue
-#
-#             child = G.get_node(child_id)
-#             curr_histogram[labelspace.labels_to_names[child.attributes.semantic_label]] += 1
-#
-#     room_object_counts[room.id] = curr_histogram
-# ```
-# <br>
-#
-# </details>
-
-# %% [markdown]
 # ### Planning and Graph Search on 3D Scene Graphs
 #
 # This section of the notebook is designed to familiarize you with how basic and
@@ -342,7 +278,7 @@ for room_id, counts in room_object_counts.items():
 # (that we are not attempting to cover).
 
 # %% [markdown]
-# #### Exercise 2.1
+# #### Example 2.1
 #
 # Given two place nodes, produce the shortest path between them in the places layer. We provide most of the implementation for A*; the only parts you have to fill in is (i) the computation of the path length to each node being considered for expansion and (ii) the computation of the heuristic between the node being considered for expansion and the goal.
 
@@ -385,12 +321,11 @@ def plan_path(G: dsg.DynamicSceneGraph, source: int, target: int, layer_name: st
 
             sibling = G.get_node(sibling_id)
 
-            g = 0.0  # cost to go (i.e., total distance to sibling node)
-            h = 0.0  # heuristic estimate (euclidean distance to target)
-
-            # =======================
-            # TODO: Fill in code here
-            # =======================
+            p_target = G.get_node(target).attributes.position
+            p_curr = curr_node.attributes.position
+            p_sibling = sibling.attributes.position
+            g = np.linalg.norm(p_curr - p_sibling) + curr_dist
+            h = np.linalg.norm(p_target - p_sibling)
 
             f = g + h
             if sibling_id in cost_to_go and f >= cost_to_go[sibling_id]:
@@ -416,43 +351,19 @@ dcist_sgl.show_planning_result(G, path)
 
 
 # %% [markdown]
-# <details>
-#     <summary>Solution (click to reveal!)</summary>
-#
-# Note that it is slightly more efficient to pre-compute the edge distances and/or cache some of the positions earlier in the algorithm, but this is the most self-contained way to compute the relevant quantitites:
-#
-# ```python
-# p_target = G.get_node(target).attributes.position
-# p_curr = curr_node.attributes.position
-# p_sibling = sibling.attributes.position
-# g = np.linalg.norm(p_curr - p_sibling) + curr_dist
-# h = np.linalg.norm(p_target - p_sibling)
-# ```
-# <br>
-#
-# </details>
-
-# %% [markdown]
-# #### Exercise 2.2
+# #### Example 2.2
 #
 # Given a region and two place nodes that are contained in the region, return the shortest path between the two place nodes that remains inside the region. `plan_path` from the previous exercise takes an optional filter when expanding nodes that you can use to accomplish this.
 
 # %%
 def plan_path_in_region(G: dsg.DynamicSceneGraph, region: int, source: int, target: int):
     """Plan a path between the source and target node inside a region."""
-
-    # =======================
-    # TODO: Fill in code here
-    # =======================
+    parent = G.get_node(region)
+    children = set([x for x in parent.children() if G.get_layer(dsg.DsgLayers.PLACES).has_node(x)])
 
     def node_in_region(node_id):
         """Check if node exists in region."""
-        in_region = True
-        # =======================
-        # TODO: Fill in code here
-        # =======================
-        return in_region
-
+        return node_id in children
 
     return plan_path(G, source, target, is_valid=node_in_region)
 
@@ -468,27 +379,7 @@ dcist_sgl.show_region_planning_result(G, path, region)
 
 
 # %% [markdown]
-# <details>
-#     <summary>Solution (click to reveal!)</summary>
-#
-# To set up the filter, we populate all the children of the region:
-# ```python
-# parent = G.get_node(region)
-# children = set([x for x in parent.children() if G.get_layer(dsg.DsgLayers.PLACES).has_node(x)])
-# ```
-# <br>
-#
-# The filter itself is just
-# ```python
-# in_region = node_id in children
-# ```
-# <br>
-# and can be condensed to `return node_id in children` if desired. 
-#
-# </details>
-
-# %% [markdown]
-# #### Exercise 2.3
+# #### Example 2.3
 #
 # Find the shortest path between two points by:
 #   - Looking up the regions that contain the start and goal place
@@ -503,15 +394,10 @@ def plan_path_through_regions(G: dsg.DynamicSceneGraph, start: int, end: int):
     if not start_node.has_parent() or not end_node.has_parent():
         return []
 
-    room_sequence = []
-
-    # =========================================================
-    # TODO: Fill in code here to get a path through the regions
-    # =========================================================
-
+    room_sequence = plan_path(G, start_node.get_parent(), end_node.get_parent(), layer_name=dsg.DsgLayers.ROOMS)
     if len(room_sequence) == 1:
         return plan_path_in_region(G, room_sequence[0], start, end)
-    
+
     path = []
     prev_place = start
     for i in range(1, len(room_sequence)):
@@ -525,17 +411,6 @@ def plan_path_through_regions(G: dsg.DynamicSceneGraph, start: int, end: int):
 
 path = plan_path_through_regions(G, place_ids[0], place_ids[1])
 dcist_sgl.show_planning_result(G, path)
-
-# %% [markdown]
-# <details>
-#     <summary>Solution (click to reveal!)</summary>
-#
-# ```python
-# room_sequence = plan_path(G, start_node.get_parent(), end_node.get_parent(), layer_name=dsg.DsgLayers.ROOMS)
-# ```
-# <br>
-#
-# </details>
 
 # %% [markdown]
 # ### Using External Libraries
