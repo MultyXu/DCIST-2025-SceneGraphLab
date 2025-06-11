@@ -60,7 +60,8 @@ python3 -m venv ~/dcist_lab_env
 Source your environment and install the requirements
 ```shell
 # Use the appropriate invocation for your environment type
-source ~/dcist_lab_env/bin/activate
+source [PATH/TO/LAB/ENV]/bin/activate
+
 pip install -e ~/scene_graph_lab
 # optionally install torch for one of the examples:
 pip3 install torch --index-url https://download.pytorch.org/whl/cpu
@@ -75,7 +76,7 @@ pip3 install torch --index-url https://download.pytorch.org/whl/cpu
 Navigate to the repository and start the notebook
 ```shell
 cd ~/scene_graph_lab
-jupyter lab
+jupyter notebook
 ```
 
 </details>

@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "dcist_sgl"
 version = "0.0.1"
 dependencies = [
-    "spark_dsg@git+https://github.com/MIT-SPARK/Spark-DSG@develop",
+    "spark_dsg",
     "gdown",
     "ipympl",
     "jupyter",
