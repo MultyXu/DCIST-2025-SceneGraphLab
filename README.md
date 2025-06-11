@@ -81,6 +81,9 @@ jupyter notebook
 
 </details>
 
+If you haven't worked with jupyter notebooks and `jupytext` before, you can open the notebook by right-clicking on `exercises.py` as in the screenshot below:
+![image](https://github.com/user-attachments/assets/285e151c-16e3-4b94-9e4f-952bf45bfc58)
+
 ### Other Activities
 
 See [here](https://github.com/MIT-SPARK/Hydra-ROS/blob/feature/ros2_docker/doc/ros2_setup.md#docker) for some information on getting Hydra set up with `docker` in ROS2.
