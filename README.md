@@ -90,4 +90,4 @@ See [here](https://github.com/MIT-SPARK/Hydra-ROS/blob/feature/ros2_docker/doc/r
 
 ### Feedback
 
-Please consider filling out the short survey (available in lab) and/or chatting with us during the lab session!
+Please consider chatting with us during the lab session if you have any feedback about `spark_dsg`!
